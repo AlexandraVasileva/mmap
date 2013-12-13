@@ -21,6 +21,7 @@ struct mymsgbuf{ // for the counter message
 
 int main(int argc, char* argv[]) {
 
+	//AP: в современных файловх системах имя может быть больше 255 символов - уберите это ограничение
 	struct filedata{ // the main structure which we use in the map file
 		char name[MAXNAMELENGTH];
 		mode_t mode;
