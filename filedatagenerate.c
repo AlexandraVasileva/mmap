@@ -12,24 +12,14 @@
 
 #define MAPFILENAME "map"
 #define MESSAGEFILENAME "/bin/bash"
-#define MAXNAMELENGTH 255
 
 struct mymsgbuf{ // for the counter message
 	long mtype;
 	int counter;
+	long int max;
 };
 
 int main(int argc, char* argv[]) {
-
-	struct filedata{ // the main structure which we use in the map file
-		char name[MAXNAMELENGTH];
-		mode_t mode;
-		uid_t uid;
-		gid_t gid;
-		off_t size;
-		time_t ctime;
-		time_t mtime;
-	} *begin, *temp;
 
 	if(argc != 2){
 		printf("Error: invalid number of arguments\n");
@@ -41,6 +31,18 @@ int main(int argc, char* argv[]) {
 	struct dirent *s;
 	struct stat bufs;
 	DIR *dirs;
+
+	long max = pathconf(source, _PC_NAME_MAX);
+	
+	struct filedata{ // the main structure which we use in the map file
+		char name[max];
+		mode_t mode;
+		uid_t uid;
+		gid_t gid;
+		off_t size;
+		time_t ctime;
+		time_t mtime;
+	} *begin, *temp;
 
 	if(!(dirs = opendir(source))) {
 		printf("Error: incorrect source directory\n");
@@ -125,8 +127,9 @@ int main(int argc, char* argv[]) {
 	struct mymsgbuf mybuf;
 	mybuf.mtype = 1;
 	mybuf.counter = counter;
+	mybuf.max = max;
 
-	if(msgsnd(msgdes, (struct msgbuf*) &mybuf, sizeof(int), 0) < 0){ // sending the counter message
+	if(msgsnd(msgdes, (struct msgbuf*) &mybuf, sizeof(int)+sizeof(long int), 0) < 0){ // sending the counter message
 		printf("Error: cannot send the message\n");
 		exit(-1);
 	}
